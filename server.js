@@ -3,6 +3,8 @@ const app = express();
 const routes = require('./routes/routes');
 const pool = require('./models/database');
 
+
+
 //Middleware
 
 app.use((err, req, res, next) => {
@@ -14,6 +16,7 @@ app.use((err, req, res, next) => {
 
 app.use('/', routes);
 app.use('/contacts', routes);
+app.use('/api-docs', routes);
 
 app.listen(process.env.PORT || 3000, () => {
     console.log('Web server is running on port ' + (process.env.PORT || 3000));
