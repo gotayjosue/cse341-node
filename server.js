@@ -3,10 +3,13 @@ const app = express();
 const routes = require('./routes/routes');
 const pool = require('./models/database');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 
 
 //Middleware
+
+app.use(cors());
 
 app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
