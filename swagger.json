@@ -137,7 +137,7 @@
           "birthday": { "type": "string", "format": "date" }
         },
         "required": ["firstName", "lastName", "email"],
-        "additionalProperties": true
+        "additionalProperties": false
       },
       "UpdateContact": {
         "allOf": [ { "$ref": "#/components/schemas/NewContact" } ],
