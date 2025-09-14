@@ -39,4 +39,7 @@ router.get('/contacts', controllers.getAllContacts);
 router.get('/contacts/:id', controllers.getContactById);
 router.use('/api-docs', swaggerUi.serve);
 router.get('/api-docs', swaggerUi.setup(swaggerDocument));
+router.post('/contacts', controllers.createContact);
+router.put('/contacts/:id', controllers.updateContact);
+router.delete('/contacts/:id', controllers.deleteContact);
 module.exports = router;

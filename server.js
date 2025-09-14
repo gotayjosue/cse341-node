@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const routes = require('./routes/routes');
 const pool = require('./models/database');
+const bodyParser = require('body-parser');
 
 
 
@@ -11,6 +12,7 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
+app.use(bodyParser.json());
 
 //Routes
 

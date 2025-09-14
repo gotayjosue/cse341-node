@@ -1,71 +1,188 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "Contacts API",
-    "description": "API documentation for Contacts",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API to list, create, update, and delete contacts."
   },
-  "host": "localhost:3000",
-  "basePath": "/",
-  "schemes": [
-    "http"
+  "servers": [
+    { "url": "http://localhost:8080", "description": "Local server" }
+  ],
+  "tags": [
+    { "name": "Contacts", "description": "Operations related to contacts" }
   ],
   "paths": {
-    "/": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/contacts": {
       "get": {
-        "description": "",
+        "tags": ["Contacts"],
+        "summary": "Get all contacts",
+        "operationId": "getAllContacts",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "List of contacts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Contact" }
+                }
+              }
+            }
           },
-          "500": {
-            "description": "Internal Server Error"
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Create a new contact",
+        "operationId": "createContact",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NewContact" },
+              "examples": {
+                "basic": {
+                  "value": { "firstName": "Ada","lastName": "Lovelace","email": "ada@example.com","favoriteColor": "blue","birthday": "1990-01-01" }
+                }
+              }
+            }
           }
+        },
+        "responses": {
+          "201": {
+            "description": "Contact created",
+            "headers": {
+              "Location": { "schema": { "type": "string" }, "description": "URL of the created resource" }
+            },
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Contact" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
     "/contacts/{id}": {
+      "parameters": [ { "$ref": "#/components/parameters/ContactId" } ],
       "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
+        "tags": ["Contacts"],
+        "summary": "Get a contact by ID",
+        "operationId": "getContactById",
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
+          "200": { "description": "Contact found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Contact" } } } },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "put": {
+        "tags": ["Contacts"],
+        "summary": "Update a contact by ID",
+        "operationId": "updateContact",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateContact" } } }
+        },
+        "responses": {
+          "200": { "description": "Contact updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Contact" } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "delete": {
+        "tags": ["Contacts"],
+        "summary": "Delete a contact by ID",
+        "operationId": "deleteContact",
+        "responses": {
+          "204": { "description": "Contact deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ContactId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Contact ID",
+        "schema": { "type": "string" },
+        "example": "66f5a4d2c3b7d0a123456789"
+      }
     },
-    "/api-docs": {
-      "get": {
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
+    "schemas": {
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "favoriteColor": { "type": "string" },
+          "birthday": { "type": "string", "format": "date" }
+        },
+        "required": ["firstName", "lastName", "email"]
+      },
+      "NewContact": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "favoriteColor": { "type": "string" },
+          "birthday": { "type": "string", "format": "date" }
+        },
+        "required": ["firstName", "lastName", "email"],
+        "additionalProperties": true
+      },
+      "UpdateContact": {
+        "allOf": [ { "$ref": "#/components/schemas/NewContact" } ],
+        "description": "Fields to update; send only the ones that change"
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "code": { "type": "string" }
+        },
+        "required": ["message"]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Request sent",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "examples": { "validation": { "value": { "message": "Validation failed" } } }
           }
         }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "examples": { "missing": { "value": { "message": "Contact not found" } } }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "examples": { "duplicate": { "value": { "message": "Email already exists" } } }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Internal server error",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
       }
     }
   }

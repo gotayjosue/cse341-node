@@ -45,5 +45,67 @@ async function getContactById(req, res) {
     }
 }
 
+async function createContact(req, res) {
+    const contact = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        favoriteColor: req.body.favoriteColor,
+        birthday: req.body.birthday
+    };
+    const client = new MongoClient(process.env.MONGODB_URI);
+    try {
+        await client.connect();
+        const result = await client.db("CSE341").collection("contacts").insertOne(contact);
+        if (result.insertedId) {
+            res.status(201).json({ _id: result.insertedId, ...contact });
+        } else {
+            res.status(500).json(result.error || 'Some error occurred while creating the contact.');
+        }
+    } finally {
+        await client.close();
+    }
+}
 
-module.exports = { getAllContacts, getContactById, homePage };
+async function updateContact(req, res) {
+    const userId = new ObjectId(req.params.id);
+    const updatedContact = req.body;
+    const client = new MongoClient(process.env.MONGODB_URI);
+    try {
+        await client.connect();
+        const result = await client.db("CSE341").collection("contacts").findOneAndUpdate(
+            { _id: userId },
+            { $set: updatedContact },
+            { returnOriginal: false }
+        );
+        if (result.value) {
+            res.status(200).json(result.value);
+        } else {
+            res.status(404).json({ message: "Contact not found" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    } finally {
+        await client.close();
+    }
+}
+
+async function deleteContact(req, res) {
+    const userId = new ObjectId(req.params.id);
+    const client = new MongoClient(process.env.MONGODB_URI);
+    try {
+        await client.connect();
+        const result = await client.db("CSE341").collection("contacts").deleteOne({ _id: userId });
+        if (result.deletedCount > 0) {
+            res.status(204).send();
+        } else {
+            res.status(404).json({ message: "Contact not found" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    } finally {
+        await client.close();
+    }
+}
+
+module.exports = { getAllContacts, getContactById, homePage, createContact, updateContact, deleteContact };
