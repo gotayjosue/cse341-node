@@ -6,7 +6,7 @@
     "description": "API to list, create, update, and delete contacts."
   },
   "servers": [
-    { "url": "http://localhost:8080", "description": "Local server" }
+    { "url": "https://cse341-node-qrqr.onrender.com", "description": "Render server" }
   ],
   "tags": [
     { "name": "Contacts", "description": "Operations related to contacts" }
