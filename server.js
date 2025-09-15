@@ -20,10 +20,8 @@ app.use(bodyParser.json());
 //Routes
 
 app.use('/', routes);
-app.use('/contacts', routes);
-app.use('/api-docs', routes);
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log('Web server is running on port ' + (process.env.PORT || 3000));
+    console.log('Web server is running on port ' + (`http://localhost:${process.env.PORT || 3000}`));
 });
 
